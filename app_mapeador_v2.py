@@ -74,7 +74,7 @@ def main():
         st.success(f"Consulta '{st.session_state['excluir']}' excluída com sucesso!")
         st.session_state["excluir"] = None
 
-    # Edita consulta se solicitado
+    # Edita consulta se solicitadoo
     if st.session_state["editar"]:
         show_form_editar(consultas)
     else:
