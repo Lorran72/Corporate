@@ -19,8 +19,8 @@ def extrair_info_m(codigo_m):
     for original, novo in rename_matches:
         colunas.append(novo)
 
-    # Remove duplicadas e vazias
-    colunas = [c for c in set(colunas) if c]
+    # Remove duplicadas, vazias e ordena
+    colunas = sorted([c for c in set(colunas) if c])
 
     # Retorna tabela do comentário final, se existir
     tabelas = [tabela_final] if tabela_final else []

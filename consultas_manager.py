@@ -12,5 +12,6 @@ def carregar_consultas():
     return {}
 
 def salvar_consultas(dados):
+    os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(dados, f, indent=4, ensure_ascii=False)

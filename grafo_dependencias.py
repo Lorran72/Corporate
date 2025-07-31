@@ -1,6 +1,8 @@
 import graphviz
+import os
+from datetime import datetime
 
-def gerar_grafo_dependencias(consultas, relacoes):
+def gerar_grafo(consultas, relacoes):
     dot = graphviz.Digraph(format='png')
     tipo_cores = {
         "stg": "lightblue",
@@ -19,4 +21,11 @@ def gerar_grafo_dependencias(consultas, relacoes):
             cor = "blue" if tipo == "empilhamento" else "red"
             dot.edge(destino, origem, color=cor, style=estilo)
 
-    return dot
+    # Salva o arquivo na pasta Grafo com nome grafo_dependencias_YYYYMMDD_HHMMSS.png
+    pasta = "Grafo"
+    os.makedirs(pasta, exist_ok=True)
+    caminho_arquivo = os.path.join(pasta, f"grafo_dependencias_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
+    dot.render(caminho_arquivo, cleanup=True)
+
+    # Retorna o caminho do arquivo gerado
+    return caminho_arquivo

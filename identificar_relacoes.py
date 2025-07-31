@@ -3,7 +3,6 @@ import re
 import os
 
 def identificar_relacoes_consultas(json_path):
-    import json, re
     with open(json_path, "r", encoding="utf-8") as f:
         consultas = json.load(f)
     relacoes = {}
@@ -12,13 +11,13 @@ def identificar_relacoes_consultas(json_path):
         relacionadas = set()
         tipos = []
 
-        combine_match = re.search(r'Table\\.Combine\\(\\{([^}]+)\\}\\)', codigo_m)
+        combine_match = re.search(r'Table\.Combine\(\{([^\}]*)\}\)', codigo_m)
         if combine_match:
             consultas_combinadas = [c.strip() for c in combine_match.group(1).split(",")]
             relacionadas.update(consultas_combinadas)
             tipos.append("empilhamento")
 
-        join_match = re.findall(r'Table\\.(?:Join|NestedJoin)\\s*\\(\\s*([^\\s,]+)', codigo_m)
+        join_match = re.findall(r'Table\.(?:Join|NestedJoin)\s*\(\s*([^\s,]+)', codigo_m)
         if join_match:
             relacionadas.update(join_match)
             tipos.append("mesclagem")

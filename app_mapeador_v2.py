@@ -1,8 +1,20 @@
+import os
+import glob
+import grafo_dependencias
+from PIL import Image
 import streamlit as st
+import graphviz
+import datetime
 from consultas_manager import carregar_consultas, salvar_consultas
 from utils import extrair_info_m, classificar_consulta
 from identificar_relacoes import identificar_relacoes_consultas
-import os
+from grafo_dependencias import gerar_grafo
+
+def get_latest_grafo(path='Grafo', prefix='grafo_dependencias_'):
+    arquivos = glob.glob(os.path.join(path, f"{prefix}*.png"))
+    if not arquivos:
+        return None
+    return max(arquivos, key=os.path.getctime)
 
 def show_form_adicionar(consultas):
     with st.form("formulario_consulta"):
@@ -57,6 +69,16 @@ def show_consultas(consultas):
             if col2.button("Excluir", key=f"excluir_{nome}"):
                 st.session_state["excluir"] = nome
 
+
+
+def mostrar_grafo_dependencias(caminho_imagem):
+    if os.path.exists(caminho_imagem):
+        st.image(Image.open(caminho_imagem), caption="Grafo de Dependências entre Consultas", use_column_width=True)
+    else:
+        st.warning("Grafo ainda não foi gerado.")
+
+
+
 def main():
     st.title("🔍 Mapeador de Consultas Power Query")
 
@@ -64,6 +86,10 @@ def main():
         st.session_state["editar"] = None
     if "excluir" not in st.session_state:
         st.session_state["excluir"] = None
+    if "mostrar_grafo" not in st.session_state:
+        st.session_state["mostrar_grafo"] = False
+    if "caminho_grafo" not in st.session_state:
+        st.session_state["caminho_grafo"] = ""
 
     consultas = carregar_consultas()
 
@@ -89,6 +115,23 @@ def main():
         tipos = ', '.join(info['tipo_relacao'])
         relacionadas = ', '.join(info['relacionadas'])
         st.markdown(f"**{consulta}**: {tipos} com **{relacionadas}**")
+    
+    # Botão para gerar grafo (apenas UM bloco, dinâmico)
+    if st.button("Gerar Grafo de Dependências"):
+        grafo_dependencias.gerar_grafo(consultas, relacoes)
+        st.success("Grafo gerado com sucesso!")
+        caminho_imagem = get_latest_grafo()
+        if caminho_imagem and os.path.exists(caminho_imagem):
+            st.image(caminho_imagem, caption="Grafo de Dependências", use_container_width=True)
+        else:
+            st.warning("Não foi possível encontrar a imagem do grafo.")
+
+    if st.session_state.get("mostrar_grafo", False):
+        mostrar_grafo_dependencias(st.session_state["caminho_grafo"])
+        if st.button("Fechar Grafo"):
+            st.session_state["mostrar_grafo"] = False
+
+
 
 if __name__ == "__main__":
     main()
