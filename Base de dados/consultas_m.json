@@ -1,58 +1,4 @@
 {
-    "stg_movimento_deposito_prazo_atual": {
-        "tipo": "stg",
-        "tabelas": [
-            "stg_movimento_deposito_prazo_atual"
-        ],
-        "colunas": [
-            "carencia_dias",
-            "desc_produto",
-            "vlr_movimento",
-            "num_conta",
-            "canal",
-            "flg_trava",
-            "vlr_taxa",
-            "cpf_cnpj",
-            "taxa",
-            "data_emissao",
-            "carencia",
-            "cod_agencia",
-            "num_titulo",
-            "data_movimento",
-            "tipo_movimento",
-            "ano_mes"
-        ],
-        "codigo_m": "let\n    Fonte = Excel.Workbook(Web.Contents(\"https://confederacaosicredi.sharepoint.com/teams/0802-BI/Shared%20Documents/Sync/01-Bases/02-Denodo/denodo_movimentos_deposito_prazo_atual.xlsx\"), null, true),\n    ldw_movimentos_deposito_prazo_a1 = Fonte{[Name=\"Sheet1\"]}[Data],\n    #\"Cabeçalhos Promovidos\" = Table.PromoteHeaders(ldw_movimentos_deposito_prazo_a1, [PromoteAllScalars=true]),\n    #\"Tipo Alterado\" = Table.TransformColumnTypes(#\"Cabeçalhos Promovidos\", {\n        {\"ano_mes\", Int64.Type}, {\"data_movimento\", type date}, {\"cod_cooperativa\", Int64.Type},\n        {\"cod_agencia\", Int64.Type}, {\"cpf_cnpj\", type text}, {\"num_conta\", type text},\n        {\"origem\", type text}, {\"tipo_movimento\", type text}, {\"tipo_lancamento\", type text},\n        {\"segmento\", type text}, {\"porte_padrao\", type text}, {\"num_titulo\", type text},\n        {\"cod_produto\", Int64.Type}, {\"desc_produto\", type text}, {\"canal\", type text},\n        {\"cod_usuario\", type text}, {\"vlr_movimento\", type number}, {\"taxa\", type number},\n        {\"carencia\", Int64.Type}, {\"flg_trava\", type text}\n    }),\n    #\"Colunas Selecionadas\" = Table.SelectColumns(#\"Tipo Alterado\", {\n        \"ano_mes\", \"data_movimento\", \"cod_agencia\", \"cpf_cnpj\", \"num_conta\", \"tipo_movimento\",\n        \"num_titulo\", \"desc_produto\", \"canal\", \"vlr_movimento\", \"taxa\", \"carencia\", \"flg_trava\"\n    }),\n    #\"Flag Trava Padronizada1\" = Table.ReplaceValue(#\"Colunas Selecionadas\", \"S\", \"Sim\", Replacer.ReplaceText, {\"flg_trava\"}),\n    #\"Flag Trava Padronizada2\" = Table.ReplaceValue(#\"Flag Trava Padronizada1\", \"N\", \"Não\", Replacer.ReplaceText, {\"flg_trava\"}),\n    #\"Tipo Investimento Adicionado\" = Table.AddColumn(#\"Flag Trava Padronizada2\", \"tipo_investimento\", each \"DP\"),\n    #\"Colunas Renomeadas\" = Table.RenameColumns(#\"Tipo Investimento Adicionado\", {\n        {\"carencia\", \"carencia_dias\"}, {\"data_movimento\", \"data_emissao\"}, {\"taxa\", \"vlr_taxa\"}\n    })\nin\n    #\"Colunas Renomeadas\" // stg_movimento_deposito_prazo_atual"
-    },
-    "stg_movimento_fundo_atual": {
-        "tipo": "stg",
-        "tabelas": [
-            "stg_movimento_fundo_atual"
-        ],
-        "colunas": [
-            "num_operacao",
-            "tipo_lancamento",
-            "cod_usuario",
-            "ano_mes",
-            "vlr_movimento",
-            "num_conta",
-            "canal",
-            "cod_produto",
-            "data_emissao",
-            "tipo_movimento",
-            "porte_padrao",
-            "cod_cooperativa",
-            "produto",
-            "segmento",
-            "nome_produto",
-            "origem",
-            "cpf_cnpj",
-            "cod_agencia",
-            "num_titulo",
-            "data_movimento"
-        ],
-        "codigo_m": "let\n    Fonte = Excel.Workbook(Web.Contents(\"https://confederacaosicredi.sharepoint.com/teams/0802-BI/Shared%20Documents/Sync/01-Bases/02-Denodo/denodo_movimentos_fundos_atual.xlsx\"), null, true),\n    Sheet1_Sheet = Fonte{[Item=\"Sheet1\",Kind=\"Sheet\"]}[Data],\n    #\"Cabeçalhos Promovidos\" = Table.PromoteHeaders(Sheet1_Sheet, [PromoteAllScalars=true]),\n    #\"Colunas Selecionadas\" = Table.SelectColumns(#\"Cabeçalhos Promovidos\", {\n        \"ano_mes\", \"data_movimento\", \"cod_cooperativa\", \"cod_agencia\", \"cpf_cnpj\", \"num_conta\",\n        \"origem\", \"tipo_movimento\", \"tipo_lancamento\", \"segmento\", \"porte_padrao\", \"num_titulo\",\n        \"cod_produto\", \"nome_produto\", \"canal\", \"cod_usuario\", \"vlr_movimento\"\n    }),\n    #\"Tipo Alterado\" = Table.TransformColumnTypes(#\"Colunas Selecionadas\", {\n        {\"ano_mes\", type text}, {\"data_movimento\", type date}, {\"cod_cooperativa\", type text},\n        {\"cod_agencia\", type text}, {\"cpf_cnpj\", type text}, {\"num_conta\", type text},\n        {\"origem\", type text}, {\"tipo_movimento\", type text}, {\"tipo_lancamento\", type text},\n        {\"segmento\", type text}, {\"porte_padrao\", type text}, {\"num_titulo\", type text},\n        {\"cod_produto\", type text}, {\"nome_produto\", type text}, {\"canal\", type text},\n        {\"cod_usuario\", type text}, {\"vlr_movimento\", type number}\n    }),\n    #\"Tipo Investimento Adicionado\" = Table.AddColumn(#\"Tipo Alterado\", \"tipo_investimento\", each \"Fundos\"),\n    #\"Colunas Renomeadas\" = Table.RenameColumns(#\"Tipo Investimento Adicionado\", {\n        {\"nome_produto\", \"produto\"}, {\"data_movimento\", \"data_emissao\"}, {\"num_titulo\", \"num_operacao\"}\n    }),\n    #\"Flag Trava Adicionada\" = Table.AddColumn(#\"Colunas Renomeadas\", \"flg_trava\", each \"Não\")\nin\n    #\"Flag Trava Adicionada\" // stg_movimento_fundo_atual\n"
-    },
     "f_movimento_geral": {
         "tipo": "fato",
         "tabelas": [
@@ -95,5 +41,238 @@
             "cod_operacao_lastro"
         ],
         "codigo_m": "let\n    // 1. União das stg_ atual + mensal (ordenadas alfabeticamente)\n    Fonte = Table.Combine({\n        stg_movimento_deposito_prazo_atual,\n        stg_movimento_deposito_prazo_mensal,\n        stg_movimento_fundo_atual,\n        stg_movimento_fundo_mensal,\n        stg_movimento_lca_atual,\n        stg_movimento_lca_mensal,\n        stg_movimento_lci_atual,\n        stg_movimento_lci_mensal,\n        stg_movimento_poupanca_atual,\n        stg_movimento_poupanca_mensal\n    }),\n    #\"Outras Colunas Removidas\" = Table.SelectColumns(Fonte,{\"ano_mes\", \"data_emissao\", \"cod_agencia\", \"cpf_cnpj\", \"num_conta\", \"tipo_movimento\", \"num_titulo\", \"desc_produto\", \"canal\", \"vlr_movimento\", \"vlr_taxa\", \"carencia_dias\", \"flg_trava\", \"tipo_investimento\", \"carencia\", \"cod_cooperativa\", \"origem\", \"tipo_lancamento\", \"segmento\", \"porte_padrao\", \"num_operacao\", \"cod_produto\", \"produto\", \"cod_usuario\", \"taxa\", \"emissor\", \"data_aplicacao\", \"data_vencimento\", \"data_carencia\", \"cod_ag\", \"cod_operacao_lastro\", \"filtro_ano_mes_inicial\", \"filtro_ano_mes_final\"}),\n\n    // 2. Padronização de tipo_movimento\n    #\"Tipo Movimento Padronizado\" = Table.ReplaceValue(#\"Outras Colunas Removidas\", each [tipo_movimento],\n        each if List.Contains({\"Resgate pelo valor bruto\", \"Resgate total\", \"Resgate pelo valor liquido\", \"Resgate para pagamento de IR\", \"DEBITO\", \"VALORIZACAO\", \"OUTROS\"}, [tipo_movimento]) then \"RESGATE\"\n        else if List.Contains({\"CREDITO\", \"DEPOSITO CHEQUE BLOQUEADO\"}, [tipo_movimento]) then \"APLICACAO\"\n        else [tipo_movimento],\n        Replacer.ReplaceText, {\"tipo_movimento\"}\n    ),\n\n    // 3. Criação de vlr_ajuste_resgate\n    #\"Valor Ajustado\" = Table.AddColumn(#\"Tipo Movimento Padronizado\", \"vlr_ajuste_resgate\", each \n        if [tipo_movimento] = \"RESGATE\" then [vlr_movimento] * -1 else [vlr_movimento], type number),\n\n    // 4. Agrupamento de taxa (apenas para tipo_investimento = \"DP\")\n    #\"Taxa Agrupada\" = Table.AddColumn(#\"Valor Ajustado\", \"Taxa_Agrup\", each \n        if [tipo_investimento] = \"DP\" then\n            if [vlr_taxa] >= 120 then \"120%\"\n            else if [vlr_taxa] >= 110 then \"110%\"\n            else if [vlr_taxa] >= 107 then \"107%\"\n            else if [vlr_taxa] >= 105 then \"105%\"\n            else if [vlr_taxa] >= 100 then \"100%\"\n            else \"<100%\"\n        else null, type text),\n\n    #\"Ordem Taxa Agrup\" = Table.AddColumn(#\"Taxa Agrupada\", \"Ordem Taxa Agrup\", each \n        if [Taxa_Agrup] = \"<100%\" then 1\n        else if [Taxa_Agrup] = \"100%\" then 2\n        else if [Taxa_Agrup] = \"105%\" then 3\n        else if [Taxa_Agrup] = \"107%\" then 4\n        else if [Taxa_Agrup] = \"110%\" then 5\n        else if [Taxa_Agrup] = \"120%\" then 6\n        else if [tipo_investimento] = \"DP\" then 7\n        else null, type number),\n\n    // 5. Campo Apto (apenas para DP)\n    #\"Apto Adicionado\" = Table.AddColumn(#\"Ordem Taxa Agrup\", \"Apto\", each \n        if [tipo_investimento] = \"DP\" and [flg_trava] = \"Não\" and [vlr_taxa] >= 120 then \"Não\"\n        else if [tipo_investimento] = \"DP\" then \"Sim\"\n        else null),\n\n    // 6. Garantia de tipo numérico para vlr_movimento\n    #\"Tipo Corrigido\" = Table.TransformColumnTypes(#\"Apto Adicionado\",{{\"vlr_movimento\", type number}, {\"data_emissao\", type date}})\nin\n    #\"Tipo Corrigido\" // fato_movimento_geral"
+    },
+    "stg_saldo_lca_atual": {
+        "tipo": "stg",
+        "tabelas": [
+            "stg_saldo_lca_atual"
+        ],
+        "colunas": [
+            "cod_agencia",
+            "cod_carteira",
+            "cpf_cnpj",
+            "data_carencia",
+            "data_competencia",
+            "data_emissao",
+            "data_vencimento",
+            "des_marca",
+            "dt_carencia",
+            "dt_competencia",
+            "dt_emissao",
+            "dt_vencimento",
+            "num_conta",
+            "num_operacao",
+            "vlr_atual",
+            "vlr_taxa",
+            "vlr_tx_pos"
+        ],
+        "codigo_m": "let\n    Fonte = Excel.Workbook(Web.Contents(\"https://confederacaosicredi.sharepoint.com/teams/0802-BI/Shared%20Documents/Sync/01-Bases/02-Denodo/denodo_investimentos_lca_atual.xlsx\"), null, true),\n    Sheet1_Sheet = Fonte{[Item=\"Sheet1\",Kind=\"Sheet\"]}[Data],\n    #\"Cabeçalhos Promovidos\" = Table.PromoteHeaders(Sheet1_Sheet, [PromoteAllScalars=true]),\n    #\"Outras Colunas Removidas\" = Table.SelectColumns(#\"Cabeçalhos Promovidos\",{\"dt_competencia\", \"cod_agencia\", \"cod_carteira\", \"cpf_cnpj\", \"num_conta\", \"dt_emissao\", \"dt_vencimento\", \"dt_carencia\", \"num_operacao\", \"vlr_atual\", \"vlr_tx_pos\", \"des_marca\"}),\n    #\"Tipo Alterado\" = Table.TransformColumnTypes(#\"Outras Colunas Removidas\",{{\"vlr_atual\", type number}, {\"dt_carencia\", type date}, {\"dt_vencimento\", type date}, {\"dt_emissao\", type date}, {\"dt_competencia\", type date}, {\"cod_agencia\", type text}, {\"cod_carteira\", type text}}),\n    #\"Add | tipo_investimento\" = Table.AddColumn(#\"Tipo Alterado\", \"tipo_investimento\", each \"LCA\"),\n    #\"Add | produto\" = Table.AddColumn(#\"Add | tipo_investimento\", \"produto\", each \"LCA\"),\n    #\"Colunas Renomeadas\" = Table.RenameColumns(#\"Add | produto\",{{\"dt_competencia\", \"data_competencia\"}, {\"dt_vencimento\", \"data_vencimento\"}, {\"dt_carencia\", \"data_carencia\"}, {\"dt_emissao\", \"data_emissao\"}, {\"vlr_tx_pos\", \"vlr_taxa\"}}),\n    #\"Add | Trava = \"\"S\"\"\" = Table.AddColumn(#\"Colunas Renomeadas\", \"flg_trava\", each \"S\"),\n    #\"Add | ano_mes\" = Table.AddColumn(#\"Add | Trava = \"\"S\"\"\", \"ano_mes\", each Text.From(Date.Year([data_competencia])) & Text.PadStart(Text.From(Date.Month([data_competencia])), 2, \"0\"))\n\nin\n    #\"Add | ano_mes\" // stg_saldo_lca_atual"
+    },
+    "stg_saldo_lci_atual": {
+        "tipo": "stg",
+        "tabelas": [
+            "stg_saldo_lci_atual"
+        ],
+        "colunas": [
+            "ano_mes",
+            "cod_agencia",
+            "cod_carteira",
+            "cpf_cnpj",
+            "dat_criacao_registro",
+            "data_carencia",
+            "data_competencia",
+            "data_emissao",
+            "data_vencimento",
+            "des_marca",
+            "dt_carencia",
+            "dt_competencia",
+            "dt_emissao",
+            "dt_vencimento",
+            "num_conta",
+            "num_operacao",
+            "vlr_atual",
+            "vlr_taxa",
+            "vlr_tx_pos"
+        ],
+        "codigo_m": "let\n    Fonte = Excel.Workbook(Web.Contents(\"https://confederacaosicredi.sharepoint.com/teams/0802-BI/Shared%20Documents/Sync/01-Bases/02-Denodo/denodo_investimentos_lci_atual.xlsx\"), null, true),\n    Sheet1_Sheet = Fonte{[Item=\"Sheet1\",Kind=\"Sheet\"]}[Data],\n    #\"Cabeçalhos Promovidos\" = Table.PromoteHeaders(Sheet1_Sheet, [PromoteAllScalars=true]),\n    #\"Outras Colunas Removidas\" = Table.SelectColumns(#\"Cabeçalhos Promovidos\",{\"dt_competencia\", \"cod_agencia\", \"cod_carteira\", \"cpf_cnpj\", \"num_conta\", \"dt_emissao\", \"dt_vencimento\", \"dt_carencia\", \"num_operacao\", \"vlr_atual\", \"vlr_tx_pos\", \"des_marca\", \"dat_criacao_registro\", \"ano_mes\"}),\n    #\"Tipo Alterado\" = Table.TransformColumnTypes(#\"Outras Colunas Removidas\",{{\"vlr_atual\", type number}, {\"dat_criacao_registro\", type date}, {\"dt_vencimento\", type date}, {\"dt_carencia\", type date}, {\"dt_emissao\", type date}, {\"cpf_cnpj\", type text}, {\"num_conta\", type text}, {\"num_operacao\", type text}, {\"vlr_tx_pos\", type number}, {\"dt_competencia\", type date}, {\"cod_agencia\", type text}, {\"cod_carteira\", type text}, {\"ano_mes\", type text}}),\n    #\"Add | tipo_investimento\" = Table.AddColumn(#\"Tipo Alterado\", \"tipo_investimento\", each \"LCI\"),\n    #\"Add | produto\" = Table.AddColumn(#\"Add | tipo_investimento\", \"produto\", each \"LCI\"),\n    #\"Colunas Renomeadas1\" = Table.RenameColumns(#\"Add | produto\",{{\"dt_vencimento\", \"data_vencimento\"}, {\"dt_carencia\", \"data_carencia\"}, {\"dt_emissao\", \"data_emissao\"}, {\"dat_criacao_registro\", \"data_competencia\"}, {\"vlr_tx_pos\", \"vlr_taxa\"}}),\n    #\"Tipo Alterado1\" = Table.TransformColumnTypes(#\"Colunas Renomeadas1\",{{\"vlr_taxa\", type number}}),\n    #\"Add | Trava = \"\"S\"\"\" = Table.AddColumn(#\"Tipo Alterado1\", \"flg_trava\", each \"S\")\nin\n    #\"Add | Trava = \"\"S\"\"\" // stg_saldo_lci_atual"
+    },
+    "stg_saldo_poupanca_atual": {
+        "tipo": "stg",
+        "tabelas": [
+            "stg_saldo_poupanca_atual"
+        ],
+        "colunas": [
+            "cod_agencia",
+            "cod_carteira",
+            "cpf_cnpj",
+            "dat_aplicacao",
+            "data_competencia",
+            "data_emissao",
+            "des_marca",
+            "dt_competencia",
+            "espcta",
+            "num_conta",
+            "num_operacao",
+            "num_titulo",
+            "origem_dados",
+            "produto",
+            "saldos",
+            "vlr_atual"
+        ],
+        "codigo_m": "let\n    Fonte = Excel.Workbook(Web.Contents(\"https://confederacaosicredi.sharepoint.com/teams/0802-BI/Shared%20Documents/Sync/01-Bases/02-Denodo/denodo_saldos_poupanca_diario.xlsx\"), null, true),\n    Sheet1_Sheet = Fonte{[Item=\"Sheet1\",Kind=\"Sheet\"]}[Data],\n    #\"Cabeçalhos Promovidos\" = Table.PromoteHeaders(Sheet1_Sheet, [PromoteAllScalars=true]),\n    #\"Outras Colunas Removidas\" = Table.SelectColumns(#\"Cabeçalhos Promovidos\",{\"cod_agencia\", \"num_conta\", \"cpf_cnpj\", \"dat_aplicacao\", \"saldos\", \"num_titulo\", \"espcta\", \"cod_carteira\", \"origem_dados\", \"dt_competencia\"}),\n    #\"Tipo Alterado\" = Table.TransformColumnTypes(#\"Outras Colunas Removidas\",{{\"dt_competencia\", type date}, {\"dat_aplicacao\", type date}, {\"cpf_cnpj\", type text}, {\"num_conta\", type text}, {\"num_titulo\", type text}, {\"espcta\", type text}, {\"saldos\", type number}, {\"cod_carteira\", type text}, {\"cod_agencia\", type text}, {\"origem_dados\", type text}}),\n    #\"Add | tipo_investimento\" = Table.AddColumn(#\"Tipo Alterado\", \"tipo_investimento\", each \"Poupança\"),\n    #\"Filtered | Saldo > 0\" = Table.SelectRows(#\"Add | tipo_investimento\", each [saldos] > 0),\n    #\"Colunas Renomeadas\" = Table.RenameColumns(#\"Filtered | Saldo > 0\",{{\"dt_competencia\", \"data_competencia\"}, {\"espcta\", \"produto\"}, {\"saldos\", \"vlr_atual\"}, {\"num_titulo\", \"num_operacao\"}, {\"dat_aplicacao\", \"data_emissao\"}, {\"origem_dados\", \"des_marca\"}}),\n    #\"Add | ano_mes\" = Table.AddColumn(#\"Colunas Renomeadas\", \"ano_mes\", each Text.From(Date.Year([data_competencia])) & Text.PadStart(Text.From(Date.Month([data_competencia])), 2, \"0\"))\n \nin\n    #\"Add | ano_mes\" // stg_saldo_poupanca_atual"
+    },
+    "stg_saldo_previdencia_atual": {
+        "tipo": "stg",
+        "tabelas": [
+            "stg_saldo_previdencia_atual"
+        ],
+        "colunas": [
+            "cod_agencia",
+            "cod_carteira",
+            "conta",
+            "cpf_cnpj",
+            "data_competencia",
+            "des_marca",
+            "nom_plano_previdencia",
+            "num_conta",
+            "num_operacao",
+            "num_saldo_total",
+            "produto",
+            "vlr_atual"
+        ],
+        "codigo_m": "let\n    Fonte = Excel.Workbook(Web.Contents(\"https://confederacaosicredi.sharepoint.com/teams/0802-BI/Shared%20Documents/Sync/01-Bases/02-Denodo/denodo_saldo_previdencia_atual.xlsx\"), null, true),\n    Sheet1_Sheet = Fonte{[Item=\"Sheet1\",Kind=\"Sheet\"]}[Data],\n    #\"Cabeçalhos Promovidos\" = Table.PromoteHeaders(Sheet1_Sheet, [PromoteAllScalars=true]),\n    #\"Outras Colunas Removidas\" = Table.SelectColumns(#\"Cabeçalhos Promovidos\",{\"data_competencia\", \"cod_agencia\", \"conta\", \"cod_carteira\", \"cpf_cnpj\", \"nom_plano_previdencia\", \"num_saldo_total\", \"num_operacao\", \"des_marca\"}),\n    #\"Tipo Alterado\" = Table.TransformColumnTypes(#\"Outras Colunas Removidas\",{{\"data_competencia\", type date}, {\"num_saldo_total\", type number}, {\"conta\", type text}, {\"cpf_cnpj\", type text}, {\"nom_plano_previdencia\", type text}, {\"num_operacao\", type text}, {\"des_marca\", type text}}),\n    #\"Add | tipo_investimento\" = Table.AddColumn(#\"Tipo Alterado\", \"tipo_investimento\", each \"Previdência\"),\n    #\"Colunas Renomeadas1\" = Table.RenameColumns(#\"Add | tipo_investimento\",{{\"nom_plano_previdencia\", \"produto\"}, {\"num_saldo_total\", \"vlr_atual\"}, {\"conta\", \"num_conta\"}})\n\nin\n    #\"Colunas Renomeadas1\" // stg_saldo_previdencia_atual"
+    },
+    "stg_concat_deposito_prazo_diario": {
+        "tipo": "stg",
+        "tabelas": [
+            "stg_concat_deposito_prazo_diario"
+        ],
+        "colunas": [
+            "arc_date",
+            "arc_name",
+            "cod_agencia",
+            "cod_carteira",
+            "cod_produto",
+            "cpf_cnpj",
+            "cpf_cnpj_associado",
+            "dat_carencia",
+            "dat_competencia",
+            "dat_emissao",
+            "dat_vencimento",
+            "data_carencia",
+            "data_competencia",
+            "data_emissao",
+            "data_vencimento",
+            "des_marca",
+            "flg_trava",
+            "num_conta",
+            "num_operacao",
+            "produto",
+            "vlr_atual",
+            "vlr_taxa"
+        ],
+        "codigo_m": "let\n    Fonte = Csv.Document(Web.Contents(\"https://confederacaosicredi.sharepoint.com/teams/0802-BI/Shared%20Documents/Sync/01-Bases/02-Denodo/deposito_prazo_diario/CONCAT_deposito_prazo_diario.csv\"),[Delimiter=\";\", Columns=31, Encoding=65001, QuoteStyle=QuoteStyle.None]),\n    #\"Cabeçalhos Promovidos\" = Table.PromoteHeaders(Fonte, [PromoteAllScalars=true]),\n    #\"Duplicatas Removidas\" = Table.Distinct(#\"Cabeçalhos Promovidos\", {\"dat_competencia\", \"num_operacao\"}),\n    #\"Valor Substituído1\" = Table.ReplaceValue(#\"Duplicatas Removidas\",\".\",\",\",Replacer.ReplaceText,{\"vlr_atual\"}),\n    #\"Valor Substituído2\" = Table.ReplaceValue(#\"Valor Substituído1\",\".\",\",\",Replacer.ReplaceText,{\"vlr_taxa\"}),\n    #\"Outras Colunas Removidas\" = Table.SelectColumns(#\"Valor Substituído2\",{\"dat_competencia\", \"cod_agencia\", \"num_conta\", \"cod_carteira\", \"cpf_cnpj_associado\", \"num_operacao\", \"produto\", \"vlr_atual\", \"flg_trava\", \"dat_carencia\", \"dat_vencimento\", \"dat_emissao\", \"vlr_taxa\", \"des_marca\", \"cod_produto\", \"arc_name\", \"arc_date\"}),\n    #\"Tipo Alterado\" = Table.TransformColumnTypes(#\"Outras Colunas Removidas\",{{\"dat_competencia\", type datetime}, {\"dat_carencia\", type datetime}, {\"dat_vencimento\", type datetime}, {\"dat_emissao\", type datetime}, {\"vlr_atual\", type number}, {\"vlr_taxa\", type number}, {\"cod_produto\", Int64.Type}, {\"cod_agencia\", type text}}),\n    #\"Personalização Adicionada\" = Table.AddColumn(#\"Tipo Alterado\", \"tipo_investimento\", each \"DP\"),\n    #\"Colunas Renomeadas\" = Table.RenameColumns(#\"Personalização Adicionada\",{{\"cpf_cnpj_associado\", \"cpf_cnpj\"}, {\"dat_competencia\", \"data_competencia\"}, {\"dat_vencimento\", \"data_vencimento\"}, {\"dat_carencia\", \"data_carencia\"}, {\"dat_emissao\", \"data_emissao\"}}),\n    #\"Tipo Alterado1\" = Table.TransformColumnTypes(#\"Colunas Renomeadas\",{{\"data_vencimento\", type date}, {\"data_emissao\", type date}, {\"data_carencia\", type date}}),\n    #\"Valor Substituído\" = Table.ReplaceValue(#\"Tipo Alterado1\",\" \",\"N\",Replacer.ReplaceText,{\"flg_trava\"}),\n    #\"Add | ano_mes\" = Table.AddColumn(#\"Valor Substituído\", \"ano_mes\", each Text.From(Date.Year([data_competencia])) & Text.PadStart(Text.From(Date.Month([data_competencia])), 2, \"0\")),\n    #\"Filtered | competencia atual\" = Table.SelectRows(#\"Add | ano_mes\", each ([data_competencia] <> #datetime(2025, 6, 30, 0, 0, 0)))\n\nin\n    #\"Filtered | competencia atual\" // stg_concat_deposito_prazo_diario"
+    },
+    "stg_concat_fundos_diario": {
+        "tipo": "stg",
+        "tabelas": [
+            "stg_concat_fundos_diario"
+        ],
+        "colunas": [
+            "arc_date",
+            "arc_name",
+            "cod_agencia",
+            "cod_carteira",
+            "conta",
+            "cpf_cnpj",
+            "dat_data",
+            "dat_emissao",
+            "des_marca",
+            "des_produto",
+            "num_cpf",
+            "saldo",
+            "titulo"
+        ],
+        "codigo_m": "let\n    Fonte = Csv.Document(Web.Contents(\"https://confederacaosicredi.sharepoint.com/teams/0802-BI/Shared%20Documents/Sync/01-Bases/02-Denodo/saldo_de_fundos_diario/CONCAT_saldo_de_fundos_diario.csv\"),[Delimiter=\";\", Columns=20, Encoding=65001, QuoteStyle=QuoteStyle.None]),\n    #\"Cabeçalhos Promovidos\" = Table.PromoteHeaders(Fonte, [PromoteAllScalars=true]),\n    #\"Outras Colunas Removidas\" = Table.SelectColumns(#\"Cabeçalhos Promovidos\",{\"cod_agencia\", \"dat_data\", \"conta\", \"cod_carteira\", \"num_cpf\", \"titulo\", \"des_produto\", \"saldo\", \"cpf_cnpj\", \"dat_emissao\", \"des_marca\", \"arc_name\", \"arc_date\"}),\n    #\"Valor Substituído\" = Table.ReplaceValue(#\"Outras Colunas Removidas\",\".\",\",\",Replacer.ReplaceText,{\"saldo\"}),\n    #\"Tipo Alterado\" = Table.TransformColumnTypes(#\"Valor Substituído\",{{\"arc_date\", type datetime}, {\"dat_emissao\", type datetime}, {\"saldo\", type number}, {\"dat_data\", type datetime}}),\n    #\"Add | tipo_investimento\" = Table.AddColumn(#\"Tipo Alterado\", \"tipo_investimento\", each \"Fundos\")\n\nin\n    #\"Add | tipo_investimento\" // stg_concat_fundos_diario"
+    },
+    "fato_saldo_geral": {
+        "tipo": "fato",
+        "tabelas": [
+            "fato_saldo_geral"
+        ],
+        "colunas": [],
+        "codigo_m": "let\n    Fonte = Table.Combine({\n        PadronizarTabela(stg_concat_deposito_prazo_mensal),\n        PadronizarTabela(stg_concat_fundos_mensal),\n        PadronizarTabela(stg_concat_lca_mensal),\n        PadronizarTabela(stg_concat_lci_mensal),\n        PadronizarTabela(stg_concat_poupanca_mensal),\n        PadronizarTabela(stg_concat_deposito_prazo_diario),\n        PadronizarTabela(stg_concat_fundos_diario),\n        PadronizarTabela(stg_concat_lca_diario),\n        PadronizarTabela(stg_concat_lci_diario)\n    }),\n    Add_Chave_agcart = Table.AddColumn(Fonte, \"Chave_agcart\", each Text.Combine({[cod_agencia], [cod_carteira]}, \"::\"), type text),\n    Add_tx_ponderada = Table.AddColumn(Add_Chave_agcart, \"tx_ponderada\", each [vlr_atual]*[vlr_taxa]),\n    Add_dias_carencia = Table.AddColumn(Add_tx_ponderada, \"dias_carencia\", each Duration.Days([data_carencia] - [data_emissao]), Int64.Type),\n    Add_dias_ponderado = Table.AddColumn(Add_dias_carencia, \"dias_ponderado\", each [vlr_atual]*[dias_carencia]),\n    TipoAlterado = Table.TransformColumnTypes(Add_dias_ponderado,{\n        {\"tx_ponderada\", type number},\n        {\"dias_carencia\", Int64.Type},\n        {\"dias_ponderado\", Int64.Type},\n        {\"data_competencia\", type date}\n    }),\n    ValorSubstituido = Table.ReplaceValue(TipoAlterado,\"S\",\"Sim\",Replacer.ReplaceText,{\"flg_trava\"}),\n    ValorSubstituido1 = Table.ReplaceValue(ValorSubstituido,\"N\",\"Não\",Replacer.ReplaceText,{\"flg_trava\"}),\n    TipoAlterado1 = Table.TransformColumnTypes(ValorSubstituido1,{{\"data_carencia\", type date}, {\"data_vencimento\", type date}, {\"data_emissao\", type date}})\nin\n    TipoAlterado1 //fato_saldo_geral"
+    },
+    "fato_saldo_atual": {
+        "tipo": "fato",
+        "tabelas": [
+            "fato_saldo_geral"
+        ],
+        "colunas": [
+            "ano_mes",
+            "cod_agencia",
+            "cod_carteira",
+            "cod_produto",
+            "cpf_cnpj",
+            "data_carencia",
+            "data_competencia",
+            "data_emissao",
+            "data_vencimento",
+            "des_marca",
+            "dt_competencia",
+            "flg_trava",
+            "num_conta",
+            "num_cpf",
+            "num_operacao",
+            "produto",
+            "tipo_investimento",
+            "vlr_atual",
+            "vlr_taxa"
+        ],
+        "codigo_m": "let\n    Fonte = Table.Combine({\n        stg_saldo_capital_atual,\n        stg_saldo_deposito_prazo_atual,\n        stg_saldo_fundos_atual,\n        stg_saldo_lci_atual,\n        stg_saldo_lca_atual,\n        stg_saldo_poupanca_atual,\n        stg_saldo_previdencia_atual \n    }),\n    #\"Outras Colunas Removidas\" = Table.SelectColumns(Fonte,{\"cod_agencia\", \"data_competencia\", \"num_conta\", \"cpf_cnpj\", \"cod_carteira\", \"vlr_atual\", \"des_marca\", \"tipo_investimento\", \"produto\", \"ano_mes\", \"num_operacao\", \"flg_trava\", \"data_carencia\", \"data_vencimento\", \"data_emissao\", \"vlr_taxa\", \"cod_produto\", \"num_cpf\", \"dt_competencia\"}),\n    #\"Coluna Mesclada Inserida\" = Table.AddColumn(#\"Outras Colunas Removidas\", \"Chave_agcart\", each Text.Combine({[cod_agencia], [cod_carteira]}, \"::\"), type text),\n    #\"Add | Tx Ponderada\" = Table.AddColumn(#\"Coluna Mesclada Inserida\", \"tx_ponderada\", each [vlr_atual] * [vlr_taxa]),\n    #\"Add | dias_carencia\" = Table.AddColumn(#\"Add | Tx Ponderada\", \"dias_carencia\", each Duration.Days([data_carencia] - [data_emissao]), Int64.Type),\n    #\"Add | dias_ponderado\" = Table.AddColumn(#\"Add | dias_carencia\", \"dias_ponderado\", each [vlr_atual] * [dias_carencia]),\n    #\"Tipo Alterado\" = Table.TransformColumnTypes(#\"Add | dias_ponderado\",{{\"tx_ponderada\", type number}, {\"dias_carencia\", Int64.Type}, {\"dias_ponderado\", Int64.Type}, {\"data_vencimento\", type date}, {\"data_carencia\", type date}, {\"data_emissao\", type date}}),\n    #\"Valor Substituído\" = Table.ReplaceValue(#\"Tipo Alterado\", \"S\", \"Sim\", Replacer.ReplaceText, {\"flg_trava\"}),\n    #\"Valor Substituído1\" = Table.ReplaceValue(#\"Valor Substituído\", \"N\", \"Não\", Replacer.ReplaceText, {\"flg_trava\"})\nin\n    #\"Valor Substituído1\" // fato_saldo_atual\n\n    TipoAlterado1 //fato_saldo_geral"
+    },
+    "stg_movimento_fundo_atual": {
+        "tipo": "stg",
+        "tabelas": [],
+        "colunas": [
+            "ano_mes",
+            "data_movimento",
+            "cod_cooperativa",
+            "cod_agencia",
+            "cpf_cnpj",
+            "num_conta",
+            "origem",
+            "tipo_movimento",
+            "tipo_lancamento",
+            "segmento",
+            "porte_padrao",
+            "num_titulo",
+            "cod_produto",
+            "nome_produto",
+            "canal",
+            "cod_usuario",
+            "vlr_movimento"
+        ],
+        "codigo_m": "let\n    Fonte = Excel.Workbook(Web.Contents(\"https://confederacaosicredi.sharepoint.com/teams/0802-BI/Shared%20Documents/Sync/01-Bases/02-Denodo/denodo_movimentos_fundos_atual.xlsx\"), null, true),\n    Sheet1_Sheet = Fonte{[Item=\"Sheet1\",Kind=\"Sheet\"]}[Data],\n    #\"Cabeçalhos Promovidos\" = Table.PromoteHeaders(Sheet1_Sheet, [PromoteAllScalars=true]),\n    #\"Colunas Selecionadas\" = Table.SelectColumns(#\"Cabeçalhos Promovidos\", {\n        \"ano_mes\", \"data_movimento\", \"cod_cooperativa\", \"cod_agencia\", \"cpf_cnpj\", \"num_conta\",\n        \"origem\", \"tipo_movimento\", \"tipo_lancamento\", \"segmento\", \"porte_padrao\", \"num_titulo\",\n        \"cod_produto\", \"nome_produto\", \"canal\", \"cod_usuario\", \"vlr_movimento\"\n    }),\n    #\"Tipo Alterado\" = Table.TransformColumnTypes(#\"Colunas Selecionadas\", {\n        {\"ano_mes\", type text}, {\"data_movimento\", type date}, {\"cod_cooperativa\", type text},\n        {\"cod_agencia\", type text}, {\"cpf_cnpj\", type text}, {\"num_conta\", type text},\n        {\"origem\", type text}, {\"tipo_movimento\", type text}, {\"tipo_lancamento\", type text},\n        {\"segmento\", type text}, {\"porte_padrao\", type text}, {\"num_titulo\", type text},\n        {\"cod_produto\", type text}, {\"nome_produto\", type text}, {\"canal\", type text},\n        {\"cod_usuario\", type text}, {\"vlr_movimento\", type number}\n    }),\n    #\"Tipo Investimento Adicionado\" = Table.AddColumn(#\"Tipo Alterado\", \"tipo_investimento\", each \"Fundos\"),\n    #\"Colunas Renomeadas\" = Table.RenameColumns(#\"Tipo Investimento Adicionado\", {\n        {\"nome_produto\", \"produto\"}, {\"data_movimento\", \"data_emissao\"}, {\"num_titulo\", \"num_operacao\"}\n    }),\n    #\"Flag Trava Adicionada\" = Table.AddColumn(#\"Colunas Renomeadas\", \"flg_trava\", each \"Não\")\nin\n    #\"Flag Trava Adicionada\" // stg_movimento_fundo_atual\n"
+    },
+    "stg_movimento_deposito_prazo_atual": {
+        "tipo": "stg",
+        "tabelas": [],
+        "colunas": [
+            "ano_mes",
+            "data_movimento",
+            "cod_agencia",
+            "cpf_cnpj",
+            "num_conta",
+            "tipo_movimento",
+            "num_titulo",
+            "desc_produto",
+            "canal",
+            "vlr_movimento",
+            "taxa",
+            "carencia",
+            "flg_trava"
+        ],
+        "codigo_m": "let\n    Fonte = Excel.Workbook(Web.Contents(\"https://confederacaosicredi.sharepoint.com/teams/0802-BI/Shared%20Documents/Sync/01-Bases/02-Denodo/denodo_movimentos_deposito_prazo_atual.xlsx\"), null, true),\n    ldw_movimentos_deposito_prazo_a1 = Fonte{[Name=\"Sheet1\"]}[Data],\n    #\"Cabeçalhos Promovidos\" = Table.PromoteHeaders(ldw_movimentos_deposito_prazo_a1, [PromoteAllScalars=true]),\n    #\"Tipo Alterado\" = Table.TransformColumnTypes(#\"Cabeçalhos Promovidos\", {\n        {\"ano_mes\", Int64.Type}, {\"data_movimento\", type date}, {\"cod_cooperativa\", Int64.Type},\n        {\"cod_agencia\", Int64.Type}, {\"cpf_cnpj\", type text}, {\"num_conta\", type text},\n        {\"origem\", type text}, {\"tipo_movimento\", type text}, {\"tipo_lancamento\", type text},\n        {\"segmento\", type text}, {\"porte_padrao\", type text}, {\"num_titulo\", type text},\n        {\"cod_produto\", Int64.Type}, {\"desc_produto\", type text}, {\"canal\", type text},\n        {\"cod_usuario\", type text}, {\"vlr_movimento\", type number}, {\"taxa\", type number},\n        {\"carencia\", Int64.Type}, {\"flg_trava\", type text}\n    }),\n    #\"Colunas Selecionadas\" = Table.SelectColumns(#\"Tipo Alterado\", {\n        \"ano_mes\", \"data_movimento\", \"cod_agencia\", \"cpf_cnpj\", \"num_conta\", \"tipo_movimento\",\n        \"num_titulo\", \"desc_produto\", \"canal\", \"vlr_movimento\", \"taxa\", \"carencia\", \"flg_trava\"\n    }),\n    #\"Flag Trava Padronizada1\" = Table.ReplaceValue(#\"Colunas Selecionadas\", \"S\", \"Sim\", Replacer.ReplaceText, {\"flg_trava\"}),\n    #\"Flag Trava Padronizada2\" = Table.ReplaceValue(#\"Flag Trava Padronizada1\", \"N\", \"Não\", Replacer.ReplaceText, {\"flg_trava\"}),\n    #\"Tipo Investimento Adicionado\" = Table.AddColumn(#\"Flag Trava Padronizada2\", \"tipo_investimento\", each \"DP\"),\n    #\"Colunas Renomeadas\" = Table.RenameColumns(#\"Tipo Investimento Adicionado\", {\n        {\"carencia\", \"carencia_dias\"}, {\"data_movimento\", \"data_emissao\"}, {\"taxa\", \"vlr_taxa\"}\n    })\nin\n    #\"Colunas Renomeadas\" // stg_movimento_deposito_prazo_atual"
     }
 }
